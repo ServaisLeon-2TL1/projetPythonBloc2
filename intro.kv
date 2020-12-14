@@ -5,23 +5,36 @@
     size: (400, 400)
     Label:
         text: ('Hello world')
-WindowManager:
-    MainWindow:
-    MenuWindow:
+ScreenManager:
+    MainScreen:
+        id: main
+    MenuScreen:
+        id: Menu
+    TestScreen:
+        id: test
     NewProductWindow:
+        id:formProduct
     NewCatWindow:
-
-<MainWindow>:
+        id:formCat
+    GraphScreen1:
+        id:graph1
+    GraphScreen2:
+        id:graph2
+    GraphScreen3:
+        id:graph3
+<MainScreen>
     name: "main"
-
+    id:main
     GridLayout:
-        rows :4
+        rows : 5
+        cols: 1
         padding: 10
         spacing: 10
 
         BoxLayout:
             Label:
-                text: "Bienvenue dans l'Amazon scrapp"
+                id:box
+                text:
                 haligne: "center"
                 markup: True
                 font_size: "50sp"
@@ -38,13 +51,15 @@ WindowManager:
 
             Button:
                 text: "Let's go "
+                value:"idBtn2"
                 size_hint: 1.3, 0.3
                 pos: 100, 100
                 font_size: 32
                 background_color: 0, 1, 0, 1
                 on_release:
                     app.root.current = "Menu"
-                    root.manager.transition.direction = "left"
+                    root.manager.transition.direction = "up"
+                    root.show_buttons(self)
 
             Button:
                 text: "Quitter"
@@ -54,126 +69,36 @@ WindowManager:
                 background_color: 1.0, 0.0, 0.0, 1.0
                 on_press: app.stop()
 
-<MenuWindow>:
-    name: "Menu"
-    GridLayout:
-        rows : 5
-        padding: 10
-        spacing: 10
-
-        BoxLayout:
-            Label:
-                text: "Menu"
-                haligne: "center"
-                markup: True
-                font_size: "35sp"
-
-        BoxLayout:
+<TestScreen>:
+    name: "test"
+    ScrollView:
+        GridLayout:
+            size_hint_y: None
+            id:grid
+            cols: 5
+            rows: 100
+            padding: 5
             spacing: 50
+            height : self.minimum_height
+            BoxLayout:
+                spacing: 50
+                Button:
+                    text: "Retour"
+                    size_hint: 0.1, 0.3
+                    pos: 40, 50
+                    font_size: 32
+                    background_color: 1, 1, 0
+                    on_release:
+                        app.root.current = "Menu"
+                        root.manager.transition.direction = "right"
 
-            Button:
-                text: "Ajouter un produit"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0.1, 0.5, 0.6, 1
-                on_release:
-                    app.root.current = "formProduct"
-                    root.manager.transition.direction = "up"
-
-            Button:
-                text: "Voir les produits"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0, 1, 0, 1
-                on_release:
-
-            Button:
-                text: "Ajouter une catégorie"
-                size_hint: 1.1, 0.5
-                size_hint: 1.1, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 1.0, 0.0, 0.0, 1.0
-                on_release:
-                    app.root.current = "formCat"
-                    root.manager.transition.direction = "down"
-
-        BoxLayout:
-            spacing: 50
-
-            Button:
-                text: "Besoin d'aide ?"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0.1, 0.5, 0.6, 1
-                on_release:
-
-            Button:
-                text: "Let's go "
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0, 1, 0, 1
-                on_release:
-
-            Button:
-                text: "Quitter"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 1.0, 0.0, 0.0, 1.0
-                on_press:
-
-        BoxLayout:
-            spacing: 50
-
-            Button:
-                text: "Besoin d'aide ?"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0.1, 0.5, 0.6, 1
-                on_release:
-
-            Button:
-                text: "Let's go "
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 0, 1, 0, 1
-                on_release:
-
-            Button:
-                text: "Quitter"
-                size_hint: 1.0, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 1.0, 0.0, 0.0, 1.0
-                on_press:
-
-        BoxLayout:
-            spacing: 50
-
-            Button:
-                text: "Retour"
-                size_hint: 0.1, 0.5
-                pos: 40, 50
-                font_size: 32
-                background_color: 0, 1, 0, 1
-                on_release:
-                    app.root.current = "main"
-                    root.manager.transition.direction = "right"
-
-            Button:
-                text: "Quitter"
-                size_hint: 0.1, 0.5
-                pos: 100, 100
-                font_size: 32
-                background_color: 1.0, 0.0, 0.0, 1.0
-                on_press: app.stop()
+                Button:
+                    text: "Valider"
+                    size_hint: 0.1, 0.3
+                    font_size: 32
+                    background_color: 0, 1, 0, 1
+                    on_press:
+                        formProduct.new_product(nom.text, url.text, spinner_id.text)
 
 <NewProductWindow>:
     id:formProduct
@@ -254,6 +179,190 @@ WindowManager:
                 background_color: 0, 1, 0, 1
                 on_press:
                     formProduct.new_product(nom.text, url.text, spinner_id.text)
+<MenuScreen>:
+    name: "Menu"
+    id: Menu
+    GridLayout:
+        rows : 5
+        padding: 10
+        spacing: 10
+
+        BoxLayout:
+            Label:
+                text: "Menu"
+                haligne: "center"
+                markup: True
+                font_size: "35sp"
+        BoxLayout:
+            spacing: 50
+
+            Button:
+                text: "Ajouter un produit"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0.1, 0.5, 0.6, 1
+                on_release:
+                    app.root.current = "formProduct"
+                    root.manager.transition.direction = "up"
+
+            Button:
+                text: "Voir les produits"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_release:
+
+            Button:
+                text: "Ajouter une catégorie"
+                size_hint: 1.1, 0.5
+                size_hint: 1.1, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_release:
+                    app.root.current = "formCat"
+                    root.manager.transition.direction = "down"
+
+        BoxLayout:
+            spacing: 50
+
+            Button:
+                text: "Graphique 1"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0.1, 0.5, 0.6, 1
+                on_release:
+                    app.root.current = "graph1"
+                    root.manager.transition.direction = "down"
+
+            Button:
+                text: "Graphique 2"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_release:
+
+            Button:
+                text: "Graphique 3"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press:
+
+        BoxLayout:
+            spacing: 50
+
+            Button:
+                text: "Graphique 4"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0.1, 0.5, 0.6, 1
+                on_release:
+
+            Button:
+                text: "Graphique 5"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_release:
+
+            Button:
+                text: "Graphique 6"
+                id: "ok"
+                size_hint: 1.0, 0.5
+                pos: 100, 100
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press:print(self.id)
+
+        BoxLayout:
+            spacing: 50
+
+            Button:
+                text: "Retour"
+                size_hint: 0.1, 0.5
+                pos: 40, 50
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_release:
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Quitter"
+                size_hint: 0.1, 0.5
+                pos: 100, 100
+                font_size: 32
+
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press: app.stop()
+
+<GraphScreen1>:
+    id:graph1
+    name:"graph1"
+    GridLayout:
+        rows :4
+
+        padding: 10
+        spacing: 10
+
+        BoxLayout:
+            Label:
+                text: "Graphique de prix n°1"
+                haligne: "center"
+                markup: True
+                font_size: "50sp"
+
+        BoxLayout:
+            spacing: 50
+            TextInput:
+                id: url_graph
+                hint_text: "Url du nouveau produit"
+                multiline: False
+                size_hint: 0.1, 0.3
+                pos: 100, 100
+                font_size: 16
+
+            Button:
+                text: "Changer de produit"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 0
+                on_release:
+                    on_press: formCat.return_cat(nom_cat.text)
+
+        BoxLayout:
+
+
+        BoxLayout:
+            spacing: 50
+            Button:
+                text: "Retour"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 0
+                on_release:
+                    app.root.current = "Menu"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Voir le graphique"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph1.graph()
+<GraphScreen2>:
+<GraphScreen3>:
+
 <NewCatWindow>:
     id: formCat
     name: "formCat"
