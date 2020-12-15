@@ -59,8 +59,8 @@ ScreenManager:
                 on_release:
                     app.root.current = "Menu"
                     root.manager.transition.direction = "up"
+                    root.callbackStart()
                     root.show_buttons(self)
-
             Button:
                 text: "Quitter"
                 size_hint: 0.5, 0.3
@@ -75,30 +75,29 @@ ScreenManager:
         GridLayout:
             size_hint_y: None
             id:grid
-            cols: 5
+            cols: 6
             rows: 100
             padding: 5
             spacing: 50
             height : self.minimum_height
-            BoxLayout:
-                spacing: 50
-                Button:
-                    text: "Retour"
-                    size_hint: 0.1, 0.3
-                    pos: 40, 50
-                    font_size: 32
-                    background_color: 1, 1, 0
-                    on_release:
-                        app.root.current = "Menu"
-                        root.manager.transition.direction = "right"
 
-                Button:
-                    text: "Valider"
-                    size_hint: 0.1, 0.3
-                    font_size: 32
-                    background_color: 0, 1, 0, 1
-                    on_press:
-                        formProduct.new_product(nom.text, url.text, spinner_id.text)
+            Button:
+                text: "Retour"
+                size_hint: 0.5, 0.3
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                font_size: 32
+                background_color: 1, 1, 0
+                on_release:
+                    app.root.current = "Menu"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Valider"
+                size_hint: 0.5, 0.3
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press:
+                    formProduct.new_product(nom.text, url.text, spinner_id.text)
 
 <NewProductWindow>:
     id:formProduct
@@ -245,6 +244,8 @@ ScreenManager:
                 font_size: 32
                 background_color: 0, 1, 0, 1
                 on_release:
+                    app.root.current = "graph2"
+                    root.manager.transition.direction = "down"
 
             Button:
                 text: "Graphique 3"
@@ -258,12 +259,14 @@ ScreenManager:
             spacing: 50
 
             Button:
-                text: "Graphique 4"
+                text: "Afficher les produits"
                 size_hint: 1.0, 0.5
                 pos: 100, 100
                 font_size: 32
                 background_color: 0.1, 0.5, 0.6, 1
                 on_release:
+                    app.root.current = "test"
+                    root.manager.transition.direction = "down"
 
             Button:
                 text: "Graphique 5"
@@ -336,11 +339,24 @@ ScreenManager:
                 pos: 40, 50
                 font_size: 32
                 background_color: 1, 1, 0
-                on_release:
-                    on_press: formCat.return_cat(nom_cat.text)
+                on_press: graph1.new_graph_data(url_graph.text)
 
         BoxLayout:
+            spacing: 50
+            Button:
+                text: "Démarrer la récupération"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph1.start_recup()
 
+            Button:
+                text: "Arrêter  la récupération"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press: graph1.stop_recup()
 
         BoxLayout:
             spacing: 50
@@ -349,7 +365,7 @@ ScreenManager:
                 size_hint: 0.1, 0.3
                 pos: 40, 50
                 font_size: 32
-                background_color: 1, 1, 0
+                background_color: 1, 1, 1
                 on_release:
                     app.root.current = "Menu"
                     root.manager.transition.direction = "right"
@@ -361,7 +377,145 @@ ScreenManager:
                 background_color: 0, 1, 0, 1
                 on_press: graph1.graph()
 <GraphScreen2>:
+    id: graph2
+    name: "graph2"
+    GridLayout:
+        rows :4
+
+        padding: 10
+        spacing: 10
+
+        BoxLayout:
+            Label:
+                text: "Graphique de prix n°2"
+                haligne: "center"
+                markup: True
+                font_size: "50sp"
+
+        BoxLayout:
+            spacing: 50
+            TextInput:
+                id: url_graph
+                hint_text: "Url du nouveau produit"
+                multiline: False
+                size_hint: 0.1, 0.3
+                pos: 100, 100
+                font_size: 16
+
+            Button:
+                text: "Changer de produit"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 0
+                on_press: graph2.new_graph_data(url_graph.text)
+
+        BoxLayout:
+            spacing: 50
+            Button:
+                text: "Démarrer la récupération"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph2.start_recup()
+
+            Button:
+                text: "Arrêter  la récupération"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press: graph2.stop_recup()
+
+        BoxLayout:
+            spacing: 50
+            Button:
+                text: "Retour"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 1
+                on_release:
+                    app.root.current = "Menu"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Voir le graphique"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph2.graph()
+
 <GraphScreen3>:
+    id: graph3
+    name: "graph3"
+    GridLayout:
+        rows :4
+
+        padding: 10
+        spacing: 10
+
+        BoxLayout:
+            Label:
+                text: "Graphique de prix n°2"
+                haligne: "center"
+                markup: True
+                font_size: "50sp"
+
+        BoxLayout:
+            spacing: 50
+            TextInput:
+                id: url_graph
+                hint_text: "Url du nouveau produit"
+                multiline: False
+                size_hint: 0.1, 0.3
+                pos: 100, 100
+                font_size: 16
+
+            Button:
+                text: "Changer de produit"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 0
+                on_press:
+                    graph1.new_graph_data(url_graph.text)
+
+        BoxLayout:
+            spacing: 50
+            Button:
+                text: "Démarrer la récupération"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph1.start_recup()
+
+            Button:
+                text: "Arrêter  la récupération"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 1.0, 0.0, 0.0, 1.0
+                on_press: graph1.stop_recup()
+
+        BoxLayout:
+            spacing: 50
+            Button:
+                text: "Retour"
+                size_hint: 0.1, 0.3
+                pos: 40, 50
+                font_size: 32
+                background_color: 1, 1, 1
+                on_release:
+                    app.root.current = "Menu"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Voir le graphique"
+                size_hint: 0.1, 0.3
+                font_size: 32
+                background_color: 0, 1, 0, 1
+                on_press: graph1.graph()
 
 <NewCatWindow>:
     id: formCat
