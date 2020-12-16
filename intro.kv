@@ -4,14 +4,14 @@
     size_hint: (None, None)
     size: (400, 400)
     Label:
-        text: ('Hello world')
+        text: ("Cette application vous permet \n de surveiller des produits provenant d'amazon")
 ScreenManager:
     MainScreen:
         id: main
     MenuScreen:
         id: Menu
-    TestScreen:
-        id: test
+    ProduitScreen:
+        id: produit
     NewProductWindow:
         id:formProduct
     NewCatWindow:
@@ -22,6 +22,8 @@ ScreenManager:
         id:graph2
     GraphScreen3:
         id:graph3
+    CategorieScreen:
+        id:categorie
 <MainScreen>
     name: "main"
     id:main
@@ -34,7 +36,7 @@ ScreenManager:
         BoxLayout:
             Label:
                 id:box
-                text:
+                text: "Bienvenue dans l'Amazon Scrapp"
                 haligne: "center"
                 markup: True
                 font_size: "50sp"
@@ -59,8 +61,8 @@ ScreenManager:
                 on_release:
                     app.root.current = "Menu"
                     root.manager.transition.direction = "up"
-                    root.callbackStart()
-                    root.show_buttons(self)
+
+
             Button:
                 text: "Quitter"
                 size_hint: 0.5, 0.3
@@ -69,8 +71,8 @@ ScreenManager:
                 background_color: 1.0, 0.0, 0.0, 1.0
                 on_press: app.stop()
 
-<TestScreen>:
-    name: "test"
+<ProduitScreen>:
+    name: "produit"
     ScrollView:
         GridLayout:
             size_hint_y: None
@@ -81,27 +83,21 @@ ScreenManager:
             spacing: 50
             height : self.minimum_height
 
-            Button:
-                text: "Retour"
-                size_hint: 0.5, 0.3
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                font_size: 32
-                background_color: 1, 1, 0
-                on_release:
-                    app.root.current = "Menu"
-                    root.manager.transition.direction = "right"
-
-            Button:
-                text: "Valider"
-                size_hint: 0.5, 0.3
-                font_size: 32
-                background_color: 0, 1, 0, 1
-                on_press:
-                    formProduct.new_product(nom.text, url.text, spinner_id.text)
+<CategorieScreen>:
+    name: "categorie"
+    ScrollView:
+        GridLayout:
+            size_hint_y: None
+            id:grid
+            cols: 3
+            rows: 100
+            padding: 5
+            spacing: 50
+            height : self.minimum_height
 
 <NewProductWindow>:
     id:formProduct
-    name: "formProduct"
+    name:"formProduct"
     GridLayout:
         rows :5
         padding: 10
@@ -159,6 +155,7 @@ ScreenManager:
 
                 values: formProduct.spinner()
 
+
         BoxLayout:
             spacing: 50
             Button:
@@ -212,6 +209,9 @@ ScreenManager:
                 font_size: 32
                 background_color: 0, 1, 0, 1
                 on_release:
+                    app.root.current = "produit"
+                    root.manager.transition.direction = "down"
+                    app.root.current =Menu.show_product()
 
             Button:
                 text: "Ajouter une catégorie"
@@ -223,6 +223,7 @@ ScreenManager:
                 on_release:
                     app.root.current = "formCat"
                     root.manager.transition.direction = "down"
+
 
         BoxLayout:
             spacing: 50
@@ -259,15 +260,15 @@ ScreenManager:
             spacing: 50
 
             Button:
-                text: "Afficher les produits"
+                text: "Voir les catégories"
                 size_hint: 1.0, 0.5
                 pos: 100, 100
                 font_size: 32
                 background_color: 0.1, 0.5, 0.6, 1
                 on_release:
-                    app.root.current = "test"
+                    app.root.current = "categorie"
                     root.manager.transition.direction = "down"
-
+                    app.root.current =Menu.show_cat()
             Button:
                 text: "Graphique 5"
                 size_hint: 1.0, 0.5

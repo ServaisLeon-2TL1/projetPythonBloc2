@@ -57,10 +57,12 @@ class Database:
             product = cursor.execute("""SELECT * from produits """)
             rows = cursor.fetchall()
             for row in rows:
-                print("Id = ", row[0], )
+                print("Id = ", row[0])
                 print("Nom = ", row[1])
                 print("Url = ", row[2])
-                print("Catégorie  = ", row[3], "\n"),
+                print("Catégorie  = ", row[3])
+                print("Prix = ", row[4], "\n")
+            return rows
         except mysql.connector.Error as error:
             print("Pas de produit : {}".format(error))
 
@@ -84,11 +86,11 @@ class Database:
             conn = BddConnection.start()
             cursor = conn.cursor()
             cat = cursor.execute("""SELECT * from catégories """)
-            row1 = cursor.fetchall()
-            for row in row1:
+            rows = cursor.fetchall()
+            for row in rows:
                 print("Id = ", row[0], )
                 print("Catégorie  = ", row[1], "\n")
-
+            return rows
         except mysql.connector.Error as error:
             print("Pas de catégorie : {}".format(error))
 
@@ -99,20 +101,21 @@ class Database:
         insert_tuple = (nom, url, cat, prix)
         print(insert_tuple)
         insert_query = """INSERT INTO produits (Nom, Url, Catégorie, prix) 
-                            VALUES (%s, %s, %s, %s)"""
+                                VALUES (%s, %s, %s, %s)"""
         try:
             insert = cursor.execute(insert_query, insert_tuple)
             conn.commit()
-            print('Produit bien enregisté !')
+            print('Produit bien enregistré !')
+
         except mysql.connector.Error as error:
             print("le produit n'a pas été enregistré : {}".format(error))
 
     @staticmethod
-    def update_product(id, nom, url, cat):
+    def update_product(id, nom, url, cat, prix):
         conn = BddConnection.start()
         cursor = conn.cursor()
-        insert_tuple = (nom, url, cat, id)
-        insert_query = """UPDATE produits SET Nom = %s, Url = %s, Catégorie = %s WHERE Id = %s"""
+        insert_tuple = (nom, url, cat, prix, id)
+        insert_query = """UPDATE produits SET Nom = %s, Url = %s, Catégorie = %s, prix = %s WHERE Id = %s"""
         try:
             insert = cursor.execute(insert_query, insert_tuple)
             conn.commit()
@@ -121,18 +124,36 @@ class Database:
             print("le produit n'a pas été mis à jour : {}".format(error))
 
     @staticmethod
-    def new_categories(nom):
+    def update_cat(id, nom):
         conn = BddConnection.start()
         cursor = conn.cursor()
-        insert_tuple = (nom)
-        insert_query = """INSERT INTO catégories (Cat_Nom) 
-                            VALUES (%s)"""
+        insert_tuple = (nom, id)
+        insert_query = """UPDATE catégories SET Cat_nom = %s WHERE Cat_id = %s"""
         try:
-            insert = cursor.execute(insert_query, (insert_tuple,))
+            insert = cursor.execute(insert_query, insert_tuple)
             conn.commit()
-            print('Catégorie bien enregisté !')
+            print('Catégorie mise à jour !')
         except mysql.connector.Error as error:
-            print("La catégorie n'a pas été enregistré : {}".format(error))
+            print("La catégorie n'a pas été mise à jour : {}".format(error))
+
+    @staticmethod
+    def new_categories(nom):
+        if type(nom) == str:
+            conn = BddConnection.start()
+            cursor = conn.cursor()
+            insert_tuple = (nom)
+            insert_query = """INSERT INTO catégories (Cat_Nom) 
+                                    VALUES (%s)"""
+            try:
+                insert = cursor.execute(insert_query, (insert_tuple,))
+                conn.commit()
+                print('Catégorie bien enregisté !')
+                return True
+            except mysql.connector.Error as error:
+                print("La catégorie n'a pas été enregistré : {}".format(error))
+                return error
+        else:
+            print("La catégorie ne doit peut être qu'une chaîne de caractère")
 
     @staticmethod
     def delete_categories(id):
@@ -166,12 +187,20 @@ class Database:
         print(drawing.renderText("Amazon Scrapp"))
 
     @staticmethod
-    def welcome():
-        print("Bienvenue dans l'Amazon Scrapp !")
-        print("Pour la liste des commandes tapez : ?")
-
-    def list_command(self):
-        for key, value in self.__command.items():
+    def list_command():
+        command = {
+            "?": "Affiche toute les commandes",
+            "produits": "Liste tout les produits",
+            "catégories": "liste les catégories",
+            "nouvelle catégorie": "Permet de créer une nouvelle catégories",
+            "nouveau produit": "Permet de créer une nouveau produit",
+            "supprimer catégorie": "Permet de supprimer une catégories",
+            "supprimer produit": "Permet de supprimer un produit",
+            "modifier produit": "Permet de modifier un produit existant",
+            "modifier catégorie": "Permet de modifier une catégorie existante",
+            "q": "Permet de quitter l'application"
+        }
+        for key, value in command.items():
             print(key, '=>', value)
 
     @staticmethod
@@ -196,32 +225,46 @@ class Database:
             print("Ce n'est pas un URl valide")
 
     def command(self):
-        user_input = input()
-        if user_input == '?':
-            self.list_command()
-        elif user_input == 'produits':
-            self.select_product()
-        elif user_input == 'catégories':
-            self.select_categories()
-        elif user_input == 'nouveau produit':
-            new_name = input("Entrez le nom du produit\n")
-            new_cat = input("Entrez la catégorie du produit\n")
-            new_url = input("Entrez l'url amazon du produit\n")
-            new_price = self.get_by_url(new_url)
-            self.new_product(new_name, new_url, new_cat, new_price)
-        elif user_input == 'nouvelle catégorie':
-            new_name = input('Entrez le nom de la nouvelle catégorie\n')
-            self.new_categories(new_name)
-        elif user_input == 'supprimer catégorie':
-            cat_id = input("Entrez l'id de la catégorie à supprimer\n")
-            self.delete_categories(cat_id)
-        elif user_input == 'prix':
-            self.get_product()
-        elif user_input == 'supprimer produit':
-            prod_id = input("Entrez l'id du produit à supprimer\n")
-            self.delete_product(prod_id)
-        else:
-            print("La commande saisi n'existe pas.")
+        while True:
+            user_input = input()
+            if user_input == '?':
+                self.list_command()
+            elif user_input == 'produits':
+                self.select_product()
+            elif user_input == 'catégories':
+                self.select_categories()
+            elif user_input == 'nouveau produit':
+                new_name = input("Entrez le nom du produit\n")
+                new_cat = input("Entrez la catégorie du produit\n")
+                new_url = input("Entrez l'url amazon du produit\n")
+                new_price = self.get_by_url(new_url)
+                self.new_product(new_name, new_url, new_cat, new_price)
+            elif user_input == 'nouvelle catégorie':
+                new_name = input('Entrez le nom de la nouvelle catégorie\n')
+                self.new_categories(new_name)
+            elif user_input == 'supprimer catégorie':
+                cat_id = input("Entrez l'id de la catégorie à supprimer\n")
+                self.delete_categories(cat_id)
+            elif user_input == 'prix':
+                self.get_product()
+            elif user_input == 'supprimer produit':
+                prod_id = input("Entrez l'id du produit à supprimer\n")
+                self.delete_product(prod_id)
+            elif user_input == 'modifier produit':
+                prod_id = input("Entrez l'id du produit à modifier\n")
+                prod_nom = input("Entrez le nom du produit à modifier\n")
+                prod_cat = input("Entrez la catégorie du produit à modifier\n")
+                prod_url = input("Entrez l'url amazon du produit à modifier\n")
+                new_price = self.get_by_url(prod_url)
+                self.update_product(prod_id, prod_nom, prod_url, prod_cat, new_price)
+            elif user_input == 'modifier catégorie':
+                cat_id = input("Entrez l'id de la catégorie à modifier\n")
+                cat_nom = input("Entrez le nom de la catégorie à modifier\n")
+                self.update_cat(cat_id, cat_nom)
+            elif user_input == 'q':
+                quit()
+            else:
+                print("La commande saisi n'existe pas.")
 
     def get_connector(self):
         return self.__connector

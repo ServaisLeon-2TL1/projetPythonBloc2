@@ -1,30 +1,26 @@
-from kivy.app import App
-from kivy.lang import Builder
 from kivy.uix.label import Label
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.app import App
-from BddConnection import BddConnection
-from kivy.lang import Builder
-from functools import partial
-from kivy.core.window import Window
-from kivy.uix.popup import Popup
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.config import Config
-from kivy.lang import Builder
-import mysql.connector
-from datetime import datetime
-import sched, time
-from bs4 import BeautifulSoup
-from pyfiglet import Figlet
 import re
-import validators
+import sched
+import time
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import mysql.connector
 import numpy as np
 import requests
-import matplotlib.pyplot as plt
+import validators
+from bs4 import BeautifulSoup
+from kivy.app import App
 from kivy.clock import Clock
+from kivy.config import Config
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import Screen
+
+from BddConnection import BddConnection
 
 s = sched.scheduler(time.time, time.sleep)
 
@@ -36,52 +32,7 @@ Config.write()
 
 
 class MainScreen(Screen):
-    first_btn_press = True
-
-    def show_buttons(self, btn):
-        print(btn.value)
-        self.manager.ids.test.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text=" ", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text=" ", size_hint_x=(.1)))
-
-        self.manager.ids.test.ids.grid.add_widget(Label(text="ID", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="Nom", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="Catégories", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="Prix", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="Url", size_hint_x=(.1)))
-        self.manager.ids.test.ids.grid.add_widget(Label(text="Supprimer", size_hint_x=(.1)))
-        try:
-            conn = BddConnection.start()
-            cursor = conn.cursor()
-            product = cursor.execute("""SELECT * from produits """)
-            rows = cursor.fetchall()
-            for row in rows:
-                self.manager.ids.test.ids.grid.add_widget(Label(text=str(row[0]), size_hint_x=.1))
-                self.manager.ids.test.ids.grid.add_widget(Label(text=str(row[1]), size_hint_x=.2))
-                self.manager.ids.test.ids.grid.add_widget(Label(text=str(row[3]), size_hint_x=.2))
-                self.manager.ids.test.ids.grid.add_widget(Label(text=str(row[4]), size_hint_x=.1))
-                self.manager.ids.test.ids.grid.add_widget(Button(text=str("Voir l'url"), value=row[2], size_hint_x=.1,
-                                                                 on_press=lambda x, n=row[2]: self.popup(n),
-                                                                 size_hint=(0.0, 0.1)))
-                self.manager.ids.test.ids.grid.add_widget(Button(text=str("Supprimer"), value=row[2], size_hint_x=.1,
-                                                                 on_press=lambda x, n=row[0]: BddConnection.delete_product(n),
-                                                                 size_hint=(0.0, 0.1),background_color=(1.0, 0.0, 0.0, 1.0)))
-
-
-        except mysql.connector.Error as error:
-            print("Pas de produit : {}".format(error))
-
-    @staticmethod
-    def popup(url):
-        popup = Popup(title='Url', content=Label(text=str(url)), height=100,
-                      size_hint_y=None)
-        popup.open()
-
-    def callbackStart(self):
-        Clock.schedule_interval(GraphScreen1().graph_data, 60)
+    pass
 
 
 class NewProductWindow(Screen):
@@ -98,27 +49,134 @@ class NewProductWindow(Screen):
                 price = BddConnection.get_by_url(url)
                 print(price)
                 BddConnection.new_product(nom, url, cat, price)
+                NewProductWindow().popup()
+
+
             except:
                 print("L'enregistrement n'a pas été effectuée")
+
+    @staticmethod
+    def popup():
+        popup = Popup(title='Url', content=Label(text=str("Produit ajoutée")), height=100,
+                      size_hint_y=None)
+        popup.open()
 
 
 class NewCatWindow(Screen):
     def return_cat(self, categorie):
         if categorie:
-            nom_cat = str(categorie)
-            print(nom_cat)
-            BddConnection.new_categories(nom_cat)
+            try:
+                nom_cat = str(categorie)
+                print(nom_cat)
+                print(type(nom_cat))
+                BddConnection.new_categories(nom_cat)
+                NewCatWindow().popup()
+            except:
+                print("L'enregistrement n'a pas été effectuée")
+
+    @staticmethod
+    def popup():
+        popup = Popup(title='Url', content=Label(text=str("Catégorie ajoutée")), height=100,
+                      size_hint_y=None)
+        popup.open()
 
 
 class MenuScreen(Screen):
-    pass
+    first_btn_press = True
 
 
-class TestScreen(Screen):
+    def show_product(self):
+
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text=" ", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Button(text=str("Retour"), size_hint_x=.3,
+                                                            on_press=lambda x: self.on_press(),
+                                                            size_hint=(0.0, 0.1)))
+
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="ID", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="Nom", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="Catégories", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="Prix", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="Url", size_hint_x=(.1)))
+        self.manager.ids.produit.ids.grid.add_widget(Label(text="Supprimer", size_hint_x=(.1)))
+        try:
+            conn = BddConnection.start()
+            cursor = conn.cursor()
+            product = cursor.execute("""SELECT * from produits """)
+            rows = cursor.fetchall()
+            for row in rows:
+                self.manager.ids.produit.ids.grid.add_widget(Label(text=str(row[0]), size_hint_x=.1))
+                self.manager.ids.produit.ids.grid.add_widget(Label(text=str(row[1]), size_hint_x=.2))
+                self.manager.ids.produit.ids.grid.add_widget(Label(text=str(row[3]), size_hint_x=.2))
+                self.manager.ids.produit.ids.grid.add_widget(Label(text=str(row[4]), size_hint_x=.1))
+                self.manager.ids.produit.ids.grid.add_widget(
+                    Button(text=str("Voir l'url"), value=row[2], size_hint_x=.3,
+                           on_press=lambda x, n=row[2]: self.popup(n),
+                           size_hint=(0.0, 0.1)))
+                self.manager.ids.produit.ids.grid.add_widget(Button(text=str("Supprimer"), value=row[2], size_hint_x=.3,
+                                                                    on_press=lambda x,n=row[0]: BddConnection.delete_product(n),
+                                                                    size_hint=(0.0, 0.1),
+                                                                    background_color=(1.0, 0.0, 0.0, 1.0)))
+
+
+        except mysql.connector.Error as error:
+            print("Pas de produit : {}".format(error))
+
+    def on_press(self):
+
+        self.manager.current = 'Menu'
+
+    @staticmethod
+    def popup(url):
+        popup = Popup(title='Url', content=Label(text=str(url)), height=100,
+                      size_hint_y=None)
+        popup.open()
+
+    def show_cat(self):
+
+
+        self.manager.ids.categorie.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
+        self.manager.ids.categorie.ids.grid.add_widget(Label(text=" ", size_hint_x=(.1)))
+        self.manager.ids.categorie.ids.grid.add_widget(Button(text=str("Retour"), size_hint_x=.3,
+                                                              on_press=lambda x: self.on_press(),
+                                                              size_hint=(0.0, 0.1)))
+
+        self.manager.ids.categorie.ids.grid.add_widget(Label(text="ID", size_hint_x=(.1)))
+        self.manager.ids.categorie.ids.grid.add_widget(Label(text="Nom", size_hint_x=(.1)))
+        self.manager.ids.categorie.ids.grid.add_widget(Label(text="Supprimer", size_hint_x=(.1)))
+
+        try:
+            conn = BddConnection.start()
+            cursor = conn.cursor()
+            product = cursor.execute("""SELECT * from catégories """)
+            rows = cursor.fetchall()
+            for row in rows:
+                self.manager.ids.categorie.ids.grid.add_widget(Label(text=str(row[0]), size_hint_x=.1))
+                self.manager.ids.categorie.ids.grid.add_widget(Label(text=str(row[1]), size_hint_x=.2))
+
+                self.manager.ids.categorie.ids.grid.add_widget(
+                    Button(text=str("Supprimer"), size_hint_x=.3,
+                           on_press=lambda x, n=row[0]: BddConnection.delete_categories(row[0]),
+                           size_hint=(0.0, 0.1),
+                           background_color=(1.0, 0.0, 0.0, 1.0)))
+
+
+        except mysql.connector.Error as error:
+            print("Pas de produit : {}".format(error))
+
+
+class ProduitScreen(Screen):
     pass
 
 
 class AnotherScreen(Screen):
+    pass
+
+
+class CategorieScreen(Screen):
     pass
 
 
@@ -149,7 +207,6 @@ class GraphScreen1(Screen):
         plt.yticks(rotation=45)
         plt.xticks(y_pos, bars)
         plt.show()
-
 
     @staticmethod
     def graph_data(u):
@@ -186,7 +243,6 @@ class GraphScreen1(Screen):
         except mysql.connector.Error as error:
             print("Les données n'ont pas été enregistrer : {}".format(error))
 
-
     def new_graph_data(self, url):
         s = sched.scheduler(time.time, time.sleep)
         url_valid = validators.url(url)
@@ -194,12 +250,14 @@ class GraphScreen1(Screen):
             f = open("graph1.txt", "w")
             f.write(str(url))
             f.close()
+            popup = Popup(title='Erreur', content=Label(text="Produit ajouter"), height=100,
+                          size_hint_y=None)
+            popup.open()
             self.empty_table()
         else:
             popup = Popup(title='Erreur', content=Label(text="Url invalide"), height=100,
                           size_hint_y=None)
             popup.open()
-
 
     def empty_table(self):
         try:
@@ -211,7 +269,6 @@ class GraphScreen1(Screen):
             print('Table vidée !')
         except mysql.connector.Error as error:
             print("La table n'a pas été vidée: {}".format(error))
-
 
     def start_recup(self):
         print("Début de la récupération...")
@@ -424,11 +481,54 @@ class GraphScreen3(Screen):
 kv = Builder.load_file("intro.kv")
 
 
-class CoolApp(App):
+class GuiApp(App):
+    @staticmethod
+    def welcome():
+        print("Bienvenue dans l'Amazon Scrapp !")
+        print("Pour la liste des commandes tapez : ?")
+
+    @staticmethod
+    def command():
+        user_input = input()
+        if user_input == '?':
+            BddConnection.list_command()
+        elif user_input == 'produits':
+            BddConnection.select_product()
+        elif user_input == 'catégories':
+            BddConnection.select_categories()
+        elif user_input == 'nouveau produit':
+            new_name = input("Entrez le nom du produit\n")
+            new_cat = input("Entrez la catégorie du produit\n")
+            new_url = input("Entrez l'url amazon du produit\n")
+            new_price = BddConnection.get_by_url(new_url)
+            BddConnection.new_product(new_name, new_url, new_cat, new_price)
+        elif user_input == 'nouvelle catégorie':
+            new_name = input('Entrez le nom de la nouvelle catégorie\n')
+            BddConnection.new_categories(new_name)
+        elif user_input == 'supprimer catégorie':
+            cat_id = input("Entrez l'id de la catégorie à supprimer\n")
+            BddConnection.delete_categories(cat_id)
+        elif user_input == 'prix':
+            BddConnection.get_product()
+        elif user_input == 'supprimer produit':
+            prod_id = input("Entrez l'id du produit à supprimer\n")
+            BddConnection.delete_product(prod_id)
+        elif user_input == 'modifier produit':
+            prod_id = input("Entrez l'id du produit à modifier\n")
+            prod_nom = input("Entrez le nom du produit à modifier\n")
+            prod_cat = input("Entrez la catégorie du produit à modifier\n")
+            prod_url = input("Entrez l'url amazon du produit à modifier\n")
+            new_price = BddConnection.get_by_url(prod_url)
+            BddConnection.update_product(prod_id, prod_nom, prod_url, prod_cat, new_price)
+        elif user_input == 'modifier catégorie':
+            cat_id = input("Entrez l'id de la catégorie à modifier\n")
+            cat_nom = input("Entrez le nom de la catégorie à modifier\n")
+            BddConnection.update_cat(cat_id, cat_nom)
+        elif user_input == 'q':
+            quit()
+        else:
+            print("La commande saisi n'existe pas.")
 
     def build(self):
+
         return kv
-
-
-if __name__ == '__main__':
-    CoolApp().run()
