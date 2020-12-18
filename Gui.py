@@ -22,8 +22,6 @@ from kivy.uix.screenmanager import Screen
 
 from BddConnection import BddConnection
 
-s = sched.scheduler(time.time, time.sleep)
-
 Window.clearcolor = (0.1, 0.5, 0.6, 1)
 Config.set('graphics', 'resizable', 0)
 Config.set('graphics', 'width', '1500')
@@ -35,11 +33,26 @@ class MainScreen(Screen):
     pass
 
 
-class NewProductWindow(Screen):
-    def spinner(self):
+class NewProductScreen(Screen):
+    """
+        Cette classe représente l'écran permettant l'ajout d'un produit
+    """
+
+    @staticmethod
+    def spinner():
+        """
+            Permet de récupérer et de renvoyer le nom des catégories
+        """
         return BddConnection.get_cat_name()
 
-    def new_product(self, nom, url, cat):
+    @staticmethod
+    def new_product(nom, url, cat):
+        """
+            Permet d'ajouter un nouveau produit
+            :param nom: Nom du nouveau produit
+            :param url: Url du nouveau produit
+            :param cat: Catégorie du nouveau produit
+        """
         if nom == "":
             print("Le nom est vide")
         elif url == "":
@@ -49,43 +62,50 @@ class NewProductWindow(Screen):
                 price = BddConnection.get_by_url(url)
                 print(price)
                 BddConnection.new_product(nom, url, cat, price)
-                NewProductWindow().popup()
+                popup = Popup(title='Url', content=Label(text=str("Produit ajoutée")), height=100,
+                              size_hint_y=None)
+                popup.open()
 
 
             except:
                 print("L'enregistrement n'a pas été effectuée")
 
+
+class NewCatScreen(Screen):
+    """
+        Cette classe représente l'écran permettant l'ajout d'une catégorie
+    """
+
     @staticmethod
-    def popup():
-        popup = Popup(title='Url', content=Label(text=str("Produit ajoutée")), height=100,
-                      size_hint_y=None)
-        popup.open()
-
-
-class NewCatWindow(Screen):
-    def return_cat(self, categorie):
-        if categorie:
+    def return_cat(cat):
+        """
+            Permet de créer une nouvelle catégorie
+            :param cat: Nom de la catégorie
+        """
+        if cat:
             try:
-                nom_cat = str(categorie)
+                nom_cat = str(cat)
                 print(nom_cat)
                 print(type(nom_cat))
                 BddConnection.new_categories(nom_cat)
-                NewCatWindow().popup()
+                popup = Popup(title='Url', content=Label(text=str("Catégorie ajoutée")), height=100,
+                              size_hint_y=None)
+                popup.open()
             except:
                 print("L'enregistrement n'a pas été effectuée")
 
-    @staticmethod
-    def popup():
-        popup = Popup(title='Url', content=Label(text=str("Catégorie ajoutée")), height=100,
-                      size_hint_y=None)
-        popup.open()
-
 
 class MenuScreen(Screen):
-    first_btn_press = True
+    """
+        Cette classe représente l'écran qui affiche le menu
+    """
 
 
     def show_product(self):
+        """
+            Permet d'afficher tout les produit existant et de les supprimer
+            :param self:
+        """
 
         self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
         self.manager.ids.produit.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
@@ -117,7 +137,8 @@ class MenuScreen(Screen):
                            on_press=lambda x, n=row[2]: self.popup(n),
                            size_hint=(0.0, 0.1)))
                 self.manager.ids.produit.ids.grid.add_widget(Button(text=str("Supprimer"), value=row[2], size_hint_x=.3,
-                                                                    on_press=lambda x,n=row[0]: BddConnection.delete_product(n),
+                                                                    on_press=lambda x, n=row[
+                                                                        0]: BddConnection.delete_product(n),
                                                                     size_hint=(0.0, 0.1),
                                                                     background_color=(1.0, 0.0, 0.0, 1.0)))
 
@@ -125,18 +146,23 @@ class MenuScreen(Screen):
         except mysql.connector.Error as error:
             print("Pas de produit : {}".format(error))
 
-    def on_press(self):
-
-        self.manager.current = 'Menu'
 
     @staticmethod
     def popup(url):
+        """
+            Permet d'afficher un Popup avec l'url
+            :param url: L'url du produit à ajouter
+        """
         popup = Popup(title='Url', content=Label(text=str(url)), height=100,
                       size_hint_y=None)
         popup.open()
 
-    def show_cat(self):
 
+    def show_cat(self):
+        """
+            Permet d'afficher toute les catégories existant et de les supprimer
+            :param self:
+        """
 
         self.manager.ids.categorie.ids.grid.add_widget(Label(text="", size_hint_x=(.1)))
         self.manager.ids.categorie.ids.grid.add_widget(Label(text=" ", size_hint_x=(.1)))
@@ -169,21 +195,28 @@ class MenuScreen(Screen):
 
 
 class ProduitScreen(Screen):
+    """
+        Cette classe représente l'écran qui affiche les produits
+    """
     pass
 
 
-class AnotherScreen(Screen):
-    pass
-
-
-class CategorieScreen(Screen):
+class CategoriesScreen(Screen):
+    """
+        Cette classe représente l'écran qui affiche les catégories
+    """
     pass
 
 
 class GraphScreen1(Screen):
-
+    """
+        Cette classe représente l'écran qui gère le 1er graphique évolutif
+    """
     @staticmethod
     def graph():
+        """
+            Cette méthode construit un graphique à partir de données provenant de la base de données
+        """
         price_list = []
         date_list = []
         try:
@@ -209,7 +242,10 @@ class GraphScreen1(Screen):
         plt.show()
 
     @staticmethod
-    def graph_data(u):
+    def graph_data():
+        """
+             Cette méthode récupère toute les minute le prix d'un produit et l'enregistre dans la base de donnée
+        """
 
         f = open("graph1.txt", "r")
         url_valid = str(f.read())
@@ -244,7 +280,11 @@ class GraphScreen1(Screen):
             print("Les données n'ont pas été enregistrer : {}".format(error))
 
     def new_graph_data(self, url):
-        s = sched.scheduler(time.time, time.sleep)
+        """
+            Cette méthode enregistre et écrit un nouvel url dans un fichier
+            :param url: Url du nouveau produit
+            :param self:
+        """
         url_valid = validators.url(url)
         if url_valid:
             f = open("graph1.txt", "w")
@@ -259,7 +299,12 @@ class GraphScreen1(Screen):
                           size_hint_y=None)
             popup.open()
 
-    def empty_table(self):
+
+    @staticmethod
+    def empty_table():
+        """
+            Cette méthode vide la table du graphique
+        """
         try:
             conn = BddConnection.start()
             cursor = conn.cursor()
@@ -270,12 +315,22 @@ class GraphScreen1(Screen):
         except mysql.connector.Error as error:
             print("La table n'a pas été vidée: {}".format(error))
 
-    def start_recup(self):
+
+    def start_recov(self):
+        """
+            Cette méthode lance la récupération des dinnées et la construction du graphique
+            :param self:
+        """
         print("Début de la récupération...")
         self.timer = Clock.schedule_interval(self.graph_data, 60)
         print(self.timer)
 
-    def stop_recup(self):
+
+    def stop_recov(self):
+        """
+            Cette méthode stop la récupération des dinnées et la construction du graphique
+            :param self:
+        """
         self.timer.cancel()
         print("Fin de la récupération")
         Clock.unschedule(self.timer)
@@ -283,8 +338,14 @@ class GraphScreen1(Screen):
 
 
 class GraphScreen2(Screen):
+    """
+        Cette classe représente l'écran qui gère le 2ième graphique évolutif
+    """
     @staticmethod
     def graph():
+        """
+            Cette méthode construit un graphique à partir de données provenant de la base de données
+        """
         price_list = []
         date_list = []
         try:
@@ -310,7 +371,10 @@ class GraphScreen2(Screen):
         plt.show()
 
     @staticmethod
-    def graph_data(u):
+    def graph_data():
+        """
+            Cette méthode récupère toute les minute le prix d'un produit et l'enregistre dans la base de donnée
+        """
 
         f = open("graph2.txt", "r")
         url_valid = str(f.read())
@@ -345,7 +409,11 @@ class GraphScreen2(Screen):
             print("Les données n'ont pas été enregistrer : {}".format(error))
 
     def new_graph_data(self, url):
-        s = sched.scheduler(time.time, time.sleep)
+        """
+            Cette méthode enregistre et écrit un nouvel url dans un fichier
+            :param url: Url du nouveau produit
+            :param self:
+        """
         url_valid = validators.url(url)
         if url_valid:
             f = open("graph2.txt", "w")
@@ -357,23 +425,35 @@ class GraphScreen2(Screen):
                           size_hint_y=None)
             popup.open()
 
-    def empty_table(self):
+    @staticmethod
+    def empty_table():
+        """
+            Cette méthode vide la table du graphique
+        """
         try:
             conn = BddConnection.start()
             cursor = conn.cursor()
-            insert_query = """TRUNCATE TABLE graph2"""
+            insert_query = """TRUNCATE TABLE graph"""
             insert = cursor.execute(insert_query)
             conn.commit()
             print('Table vidée !')
         except mysql.connector.Error as error:
             print("La table n'a pas été vidée: {}".format(error))
 
-    def start_recup(self):
+    def start_recov(self):
+        """
+            Cette méthode lance la récupération des dinnées et la construction du graphique
+            :param self:
+        """
         print("Début de la récupération...")
         self.timer = Clock.schedule_interval(self.graph_data, 60)
         print(self.timer)
 
-    def stop_recup(self):
+        """
+            Cette méthode stop la récupération des dinnées et la construction du graphique
+            :param self:
+        """
+    def stop_recov(self):
         self.timer.cancel()
         print("Fin de la récupération")
         Clock.unschedule(self.timer)
@@ -482,53 +562,6 @@ kv = Builder.load_file("intro.kv")
 
 
 class GuiApp(App):
-    @staticmethod
-    def welcome():
-        print("Bienvenue dans l'Amazon Scrapp !")
-        print("Pour la liste des commandes tapez : ?")
-
-    @staticmethod
-    def command():
-        user_input = input()
-        if user_input == '?':
-            BddConnection.list_command()
-        elif user_input == 'produits':
-            BddConnection.select_product()
-        elif user_input == 'catégories':
-            BddConnection.select_categories()
-        elif user_input == 'nouveau produit':
-            new_name = input("Entrez le nom du produit\n")
-            new_cat = input("Entrez la catégorie du produit\n")
-            new_url = input("Entrez l'url amazon du produit\n")
-            new_price = BddConnection.get_by_url(new_url)
-            BddConnection.new_product(new_name, new_url, new_cat, new_price)
-        elif user_input == 'nouvelle catégorie':
-            new_name = input('Entrez le nom de la nouvelle catégorie\n')
-            BddConnection.new_categories(new_name)
-        elif user_input == 'supprimer catégorie':
-            cat_id = input("Entrez l'id de la catégorie à supprimer\n")
-            BddConnection.delete_categories(cat_id)
-        elif user_input == 'prix':
-            BddConnection.get_product()
-        elif user_input == 'supprimer produit':
-            prod_id = input("Entrez l'id du produit à supprimer\n")
-            BddConnection.delete_product(prod_id)
-        elif user_input == 'modifier produit':
-            prod_id = input("Entrez l'id du produit à modifier\n")
-            prod_nom = input("Entrez le nom du produit à modifier\n")
-            prod_cat = input("Entrez la catégorie du produit à modifier\n")
-            prod_url = input("Entrez l'url amazon du produit à modifier\n")
-            new_price = BddConnection.get_by_url(prod_url)
-            BddConnection.update_product(prod_id, prod_nom, prod_url, prod_cat, new_price)
-        elif user_input == 'modifier catégorie':
-            cat_id = input("Entrez l'id de la catégorie à modifier\n")
-            cat_nom = input("Entrez le nom de la catégorie à modifier\n")
-            BddConnection.update_cat(cat_id, cat_nom)
-        elif user_input == 'q':
-            quit()
-        else:
-            print("La commande saisi n'existe pas.")
 
     def build(self):
-
         return kv

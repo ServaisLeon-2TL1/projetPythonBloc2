@@ -3,6 +3,7 @@ from pyfiglet import Figlet
 from bs4 import BeautifulSoup
 import mysql.connector
 import requests
+import re
 
 
 class Database:
@@ -19,38 +20,28 @@ class Database:
     :type help: string
     :type header: dict
     :type command: dict
-    :return connector: retourne la connexion
-    :return cursor: retourne le curseur
 
     """
 
-    def __init__(self):
-
-        self.__header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/58.0.3029.110 Safari/537.36'}
-        self.__title = "Amazon Scrapp"
-        self.__welcome = "Bienvenue dans l'Amazon Scrapp !"
-        self.__help = "Pour la liste des commandes tapez : ?"
-        self.__command = {
-            "?": "Affiche toute les commandes",
-            "produits": "Liste tout les produits",
-            "catégories": "liste les catégories",
-            "nouvelle catégorie": "Permet de créer une nouvelle catégories",
-            "supprimer catégorie": "Permet de supprimer une catégories",
-            "supprimer produit": "Permet de supprimer un produit"
-        }
-
     @staticmethod
     def start():
+        """
+            Connecte l'application à la base de données
+            :return: Renvoie le connecteur de la base de donnée
+        """
         try:
             connector = mysql.connector.connect(host="localhost", user="root", passwd="", db="amazon")
             return connector
         except mysql.connector.Error as error:
             print("Impossible de se connecter à la base de données: {}".format(error))
 
+
     @staticmethod
     def select_product():
+        """
+             Récupère tout les produits enregistrés dans la base de données et les affiches en console
+            :return: Renvoie la liste contenant les données
+        """
         try:
             conn = BddConnection.start()
             cursor = conn.cursor()
@@ -68,6 +59,10 @@ class Database:
 
     @staticmethod
     def get_cat_name():
+        """
+            Récupère toute les catégories de la base de données
+            :return: Renvoie la liste contenant les données
+        """
         try:
             conn = BddConnection.start()
             cursor = conn.cursor()
@@ -82,6 +77,10 @@ class Database:
 
     @staticmethod
     def select_categories():
+        """
+            Récupère toute les infos sur les catégories enregistrés dans la base de données
+            :return: Renvoie la liste contenant les données
+        """
         try:
             conn = BddConnection.start()
             cursor = conn.cursor()
@@ -96,12 +95,16 @@ class Database:
 
     @staticmethod
     def new_product(nom, url, cat, prix):
+        """
+            Récupère toute les infos sur les catégories enregistrés dans la base de données
+            :return: Renvoie la liste contenant les données
+        """
         conn = BddConnection.start()
         cursor = conn.cursor()
         insert_tuple = (nom, url, cat, prix)
         print(insert_tuple)
         insert_query = """INSERT INTO produits (Nom, Url, Catégorie, prix) 
-                                VALUES (%s, %s, %s, %s)"""
+                            VALUES (%s, %s, %s, %s)"""
         try:
             insert = cursor.execute(insert_query, insert_tuple)
             conn.commit()
@@ -110,8 +113,19 @@ class Database:
         except mysql.connector.Error as error:
             print("le produit n'a pas été enregistré : {}".format(error))
 
+
     @staticmethod
     def update_product(id, nom, url, cat, prix):
+
+        """
+            Permet de modifier un produit
+            :param id: L'id du produit
+            :param nom: Nom du produit
+            :param url: L'url du produit
+            :param cat: La Catégorie du produit
+            :param prix: Le prix du produit récupéré automatiquement
+
+        """
         conn = BddConnection.start()
         cursor = conn.cursor()
         insert_tuple = (nom, url, cat, prix, id)
@@ -123,8 +137,14 @@ class Database:
         except mysql.connector.Error as error:
             print("le produit n'a pas été mis à jour : {}".format(error))
 
+
     @staticmethod
     def update_cat(id, nom):
+        """
+            Permet de modifier une catégorie
+            :param id: L'id de la catégorie
+            :param nom: Le Nom de la catégorie
+        """
         conn = BddConnection.start()
         cursor = conn.cursor()
         insert_tuple = (nom, id)
@@ -136,14 +156,19 @@ class Database:
         except mysql.connector.Error as error:
             print("La catégorie n'a pas été mise à jour : {}".format(error))
 
+
     @staticmethod
     def new_categories(nom):
+        """
+            Permet de créer une nouvelle catégorie
+            :param nom: Le Nom de la catégorie
+        """
         if type(nom) == str:
             conn = BddConnection.start()
             cursor = conn.cursor()
             insert_tuple = (nom)
             insert_query = """INSERT INTO catégories (Cat_Nom) 
-                                    VALUES (%s)"""
+                                VALUES (%s)"""
             try:
                 insert = cursor.execute(insert_query, (insert_tuple,))
                 conn.commit()
@@ -157,6 +182,10 @@ class Database:
 
     @staticmethod
     def delete_categories(id):
+        """
+            Permet de supprimer une catégorie
+            :param id: L'id de la catégorie
+        """
         conn = BddConnection.start()
         cursor = conn.cursor()
         delete_tuple = (id)
@@ -168,8 +197,13 @@ class Database:
         except mysql.connector.Error as error:
             print("La catégorie n'a pas été supprimé : {}".format(error))
 
+
     @staticmethod
     def delete_product(id):
+        """
+            Permet de supprimer un produit
+            :param id: L'id du produit
+        """
         conn = BddConnection.start()
         cursor = conn.cursor()
         delete_tuple = (id)
@@ -183,11 +217,18 @@ class Database:
 
     @staticmethod
     def intro():
+        """
+            Affiche le titre avec un design particulier
+        """
         drawing = Figlet(font='slant')
         print(drawing.renderText("Amazon Scrapp"))
 
+
     @staticmethod
     def list_command():
+        """
+            Stock et affiche la liste des commandes
+        """
         command = {
             "?": "Affiche toute les commandes",
             "produits": "Liste tout les produits",
@@ -203,8 +244,13 @@ class Database:
         for key, value in command.items():
             print(key, '=>', value)
 
+
     @staticmethod
     def get_by_url(new_url):
+        """
+            Vérifie l'authenticité d'un url et récupère son prix
+            :param new_url: Nouvel url transmit par l'utilisateur
+        """
         url_valid = validators.url(new_url)
         if url_valid:
             try:
@@ -224,51 +270,48 @@ class Database:
         else:
             print("Ce n'est pas un URl valide")
 
-    def command(self):
+    @staticmethod
+    def command():
+        """
+            Permet de répondre au commande de l'utilisateur
+        """
         while True:
             user_input = input()
             if user_input == '?':
-                self.list_command()
+                list_command()
             elif user_input == 'produits':
-                self.select_product()
+                select_product()
             elif user_input == 'catégories':
-                self.select_categories()
+                select_categories()
             elif user_input == 'nouveau produit':
                 new_name = input("Entrez le nom du produit\n")
                 new_cat = input("Entrez la catégorie du produit\n")
                 new_url = input("Entrez l'url amazon du produit\n")
                 new_price = self.get_by_url(new_url)
-                self.new_product(new_name, new_url, new_cat, new_price)
+                new_product(new_name, new_url, new_cat, new_price)
             elif user_input == 'nouvelle catégorie':
                 new_name = input('Entrez le nom de la nouvelle catégorie\n')
-                self.new_categories(new_name)
+                new_categories(new_name)
             elif user_input == 'supprimer catégorie':
                 cat_id = input("Entrez l'id de la catégorie à supprimer\n")
-                self.delete_categories(cat_id)
+                delete_categories(cat_id)
             elif user_input == 'prix':
-                self.get_product()
+                get_product()
             elif user_input == 'supprimer produit':
                 prod_id = input("Entrez l'id du produit à supprimer\n")
-                self.delete_product(prod_id)
+                delete_product(prod_id)
             elif user_input == 'modifier produit':
                 prod_id = input("Entrez l'id du produit à modifier\n")
                 prod_nom = input("Entrez le nom du produit à modifier\n")
                 prod_cat = input("Entrez la catégorie du produit à modifier\n")
                 prod_url = input("Entrez l'url amazon du produit à modifier\n")
                 new_price = self.get_by_url(prod_url)
-                self.update_product(prod_id, prod_nom, prod_url, prod_cat, new_price)
+                update_product(prod_id, prod_nom, prod_url, prod_cat, new_price)
             elif user_input == 'modifier catégorie':
                 cat_id = input("Entrez l'id de la catégorie à modifier\n")
                 cat_nom = input("Entrez le nom de la catégorie à modifier\n")
-                self.update_cat(cat_id, cat_nom)
+                update_cat(cat_id, cat_nom)
             elif user_input == 'q':
                 quit()
             else:
                 print("La commande saisi n'existe pas.")
-
-    def get_connector(self):
-        return self.__connector
-
-    def get_cursor(self):
-        self.__cursor = self.__connector.cursor()
-        return self.__cursor
